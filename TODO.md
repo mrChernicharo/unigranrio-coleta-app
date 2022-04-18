@@ -1,0 +1,2 @@
+-   deploy using github pages
+-   secure API Key
