@@ -1,4 +1,4 @@
-import config from './_config.js';
+import config from './config.js';
 
 const locations = [
 	{ name: 'Cruz Vermelha', lat: -22.9119, lng: -43.188182 },
