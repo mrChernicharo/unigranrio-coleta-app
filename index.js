@@ -1,6 +1,7 @@
 import { config, mapThemes } from './config.js';
 let initialZoom = 12;
 const points = [];
+const markers = [];
 let currentPoint = null;
 const pointInfoContainer = document.querySelector('#selected-point-info');
 const locations = [
@@ -44,15 +45,18 @@ function initMap() {
 		styles: mapThemes.retro,
 	});
 
-	setPoints(map);
+	addMarkers(map);
 
 	map.addListener('center_changed', () => {
-		console.log('center_changed', [map.center.lat(), map.center.lng()]);
+		// console.log('center_changed', [map.center.lat(), map.center.lng()]);
+	});
+
+	map.addListener('zoom_changed', () => {
+		console.log('map zoom:', map.zoom);
 	});
 }
 
-function setPoints(map) {
-	let i = 0;
+function addMarkers(map) {
 	locations.forEach(location => {
 		const { name, lat, lng } = location;
 
@@ -61,13 +65,14 @@ function setPoints(map) {
 			map,
 			title: name,
 			icon: image,
-			// label: name,
+			label: '',
 			// collisionBehavior:
 			// 	google.maps.CollisionBehavior.REQUIRED_AND_HIDES_OPTIONAL,
 		});
 
+		markers.push({ ...marker });
 		points.push({
-			title: marker.title,
+			name: marker.title,
 			latitude: lat,
 			longitude: lng,
 		});
@@ -76,14 +81,12 @@ function setPoints(map) {
 			let zoom = map.zoom < 18 ? map.zoom + 1 : map.zoom;
 			map.setZoom(zoom);
 			map.setCenter();
-			currentPoint = points[i];
 			console.log('marker:click', {
 				e,
 				map,
 				marker,
-				markerData: points[i],
 			});
-			i++;
+			updatePointDetails(marker);
 		});
 	});
 }
@@ -92,6 +95,18 @@ function appendMapScript() {
 	const script = document.createElement('script');
 	script.src = `https://maps.googleapis.com/maps/api/js?key=${config.API_KEYS}&callback=initMap`;
 	document.body.appendChild(script);
+}
+
+function updatePointDetails(marker) {
+	const pointInfoDiv = document.createElement('div');
+	const pointNameH3 = document.createElement('h3');
+	const pointLocation = document.createElement('h5');
+	pointInfoContainer.innerHTML = '';
+	pointNameH3.textContent = 'Ponto de coleta: ' + marker.title;
+	pointLocation.textContent = `latitude: ${marker.position.lat()}, longitude: ${marker.position.lng()} `;
+	pointInfoDiv.appendChild(pointNameH3);
+	pointInfoDiv.appendChild(pointLocation);
+	pointInfoContainer.appendChild(pointInfoDiv);
 }
 
 window.initMap = initMap;
